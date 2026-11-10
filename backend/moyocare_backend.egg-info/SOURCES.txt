@@ -1,0 +1,6 @@
+pyproject.toml
+moyocare_backend.egg-info/PKG-INFO
+moyocare_backend.egg-info/SOURCES.txt
+moyocare_backend.egg-info/dependency_links.txt
+moyocare_backend.egg-info/requires.txt
+moyocare_backend.egg-info/top_level.txt

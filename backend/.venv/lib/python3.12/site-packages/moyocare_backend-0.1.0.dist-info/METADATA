@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: moyocare-backend
+Version: 0.1.0
+Summary: Offline-first community health case reporting platform
+Requires-Python: >=3.12
+Requires-Dist: Django<5.3,>=5.2
+Requires-Dist: djangorestframework
+Requires-Dist: djangorestframework-simplejwt
+Requires-Dist: psycopg[binary]
+Requires-Dist: django-filter
+Requires-Dist: django-environ
+Requires-Dist: drf-spectacular
+Requires-Dist: gunicorn
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-django; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: factory-boy; extra == "dev"
+Requires-Dist: django-debug-toolbar; extra == "dev"

@@ -1,0 +1,16 @@
+Django<5.3,>=5.2
+djangorestframework
+djangorestframework-simplejwt
+psycopg[binary]
+django-filter
+django-environ
+drf-spectacular
+gunicorn
+
+[dev]
+pytest
+pytest-django
+pytest-cov
+ruff
+factory-boy
+django-debug-toolbar

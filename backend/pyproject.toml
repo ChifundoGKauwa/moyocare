@@ -1,0 +1,38 @@
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moyocare-backend"
+version = "0.1.0"
+description = "Offline-first community health case reporting platform"
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=5.2,<5.3",
+    "djangorestframework",
+    "djangorestframework-simplejwt",
+    "psycopg[binary]",
+    "django-filter",
+    "django-environ",
+    "drf-spectacular",
+    "gunicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-django",
+    "pytest-cov",
+    "ruff",
+    "factory-boy",
+    "django-debug-toolbar",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.development"
+python_files = ["test_*.py", "*_tests.py"]
