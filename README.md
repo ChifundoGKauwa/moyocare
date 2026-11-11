@@ -132,6 +132,32 @@ Base path:
 
 API documentation is provided through OpenAPI, allowing developers to inspect available endpoints, request schemas and response formats.
 
+Patient profiles are managed at `POST /api/v1/patients/`. Submit a visit report to
+`POST /api/v1/patient-reports/` with the registered patient's UUID, symptom selections,
+age and gender at the time of the report, and the action taken. The mobile client should
+generate a stable `client_id` UUID and reuse it when retrying an offline submission; an
+identical retry returns the existing report instead of creating a duplicate.
+
+```json
+{
+  "client_id": "2bd4f2bd-b7a0-460c-9db0-e58108fb22e0",
+  "patient": "bf9886a3-8d6a-49bb-b865-79013b7de4b9",
+  "patient_name": "Jane Banda",
+  "age": 34,
+  "gender": "female",
+  "symptoms": ["fever", "cough"],
+  "action_taken": "Given paracetamol; referred to health centre",
+  "occurred_at": "2026-11-10T15:30:00Z"
+}
+```
+
+`occurred_at` is optional; if omitted, the server records the submission time.
+
+Requests use JSON with `Content-Type: application/json` and a JWT bearer token. Patient
+and report access is limited to the user's active facility memberships; staff accounts
+have administrative access across facilities. Facility memberships are assigned in
+Django admin.
+
 ## Development Setup
 
 ### Prerequisites
