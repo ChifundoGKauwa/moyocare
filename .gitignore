@@ -1,0 +1,147 @@
+
+# ==================================================
+# Environment variables and secrets
+# ==================================================
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+secrets/
+credentials/
+
+# ==================================================
+# Python
+# ==================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python packaging
+build/
+dist/
+.eggs/
+
+# ==================================================
+# Django
+# ==================================================
+staticfiles/
+media/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Django migrations:
+# DO NOT ignore migrations; they must be committed.
+
+# ==================================================
+# Testing and coverage
+# ==================================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.cache/
+coverage.xml
+test-results/
+
+# ==================================================
+# Python tooling
+# ==================================================
+.mypy_cache/
+.dmypy.json
+.pyre/
+.ruff_cache/
+.pytype/
+.ipynb_checkpoints/
+
+# ==================================================
+# Logs and temporary files
+# ==================================================
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# ==================================================
+# Database and local data
+# ==================================================
+*.sqlite3
+*.sqlite3-journal
+*.db
+*.dump
+*.bak
+
+# ==================================================
+# Docker and local infrastructure
+# ==================================================
+.docker/
+docker-data/
+volumes/
+postgres-data/
+minio-data/
+
+# ==================================================
+# Kotlin / Android / Gradle
+# ==================================================
+.gradle/
+**/build/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Android generated files
+**/.kotlin/
+
+# ==================================================
+# IDEs and editors
+# ==================================================
+.vscode/
+*.code-workspace
+
+# ==================================================
+# Operating system
+# ==================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ==================================================
+# Frontend (Next.js / Node.js)
+# ==================================================
+node_modules/
+.next/
+out/
+.turbo/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==================================================
+# Generated documentation and artifacts
+# ==================================================
+*.generated.*
