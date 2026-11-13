@@ -170,3 +170,49 @@ class TestJWTAuthentication:
 
         assert response.status_code == 200
         assert "access" in response.data
+
+
+@pytest.mark.django_db
+class TestCreateStaffUserView:
+
+    def test_superuser_can_create_staff_member(self):
+        superuser = User.objects.create_superuser(
+            email="admin@moyocare.org",
+            password="AdminPassword123!",
+        )
+        client = APIClient()
+        client.force_authenticate(user=superuser)
+
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "email": "staff@moyocare.org",
+                "password": "StaffPassword456!",
+                "first_name": "Mary",
+                "last_name": "Kumwenda",
+                "is_staff": True,
+            },
+        )
+
+        assert response.status_code == 201
+        assert User.objects.filter(email="staff@moyocare.org").exists()
+        created_user = User.objects.get(email="staff@moyocare.org")
+        assert created_user.is_staff is True
+        assert created_user.check_password("StaffPassword456!")
+
+    def test_non_admin_user_cannot_create_staff_member(self, user):
+        client = APIClient()
+        client.force_authenticate(user=user)
+
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "email": "staff2@moyocare.org",
+                "password": "StaffPassword456!",
+                "first_name": "Jane",
+                "last_name": "Kauwa",
+                "is_staff": True,
+            },
+        )
+
+        assert response.status_code == 403
