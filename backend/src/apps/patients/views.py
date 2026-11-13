@@ -1,17 +1,22 @@
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.response import Response
 
+from apps.audit.services import AuditedViewSetMixin
+
+from .filters import PatientFilter
 from .models import Patient, PatientReport
 from .serializers import PatientReportSerializer, PatientSerializer
+from .services import ReportConflict, submit_patient_report
 
 
-class PatientViewSet(viewsets.ModelViewSet):
+class PatientViewSet(AuditedViewSetMixin, viewsets.ModelViewSet):
     """Limit identifiable patient records to staff and assigned facility members."""
 
+    audit_resource_type = "patient"
     http_method_names = ("get", "post", "put", "patch", "head", "options")
     serializer_class = PatientSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filterset_fields = ("facility", "sex", "village", "is_active")
+    filterset_class = PatientFilter
     search_fields = ("first_name", "last_name", "village", "facility__name")
     ordering_fields = ("first_name", "last_name", "age", "created_at", "updated_at")
     ordering = ("last_name", "first_name")
@@ -52,23 +57,12 @@ class PatientReportViewSet(
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        values = dict(serializer.validated_data)
-        client_id = values.pop("client_id")
-        report, created = PatientReport.objects.get_or_create(
-            client_id=client_id,
-            defaults={**values, "reported_by": request.user},
-        )
-
-        if not created and any(
-            (
-                report.patient_id != values["patient"].pk,
-                report.age_at_report != values["age_at_report"],
-                report.gender_at_report != values["gender_at_report"],
-                report.symptoms != values["symptoms"],
-                report.action_taken != values.get("action_taken", ""),
-                "occurred_at" in values and report.occurred_at != values["occurred_at"],
+        try:
+            report, created = submit_patient_report(
+                validated_data=serializer.validated_data,
+                actor=request.user,
             )
-        ):
+        except ReportConflict:
             return Response(
                 {"client_id": ["This identifier was already used for a different report."]},
                 status=status.HTTP_409_CONFLICT,
