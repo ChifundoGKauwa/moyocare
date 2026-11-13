@@ -78,7 +78,10 @@ class PatientReport(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
-        indexes = (models.Index(fields=("patient", "created_at")),)
+        indexes = (
+            models.Index(fields=("patient", "created_at")),
+            models.Index(fields=("occurred_at",)),
+        )
 
     def __str__(self):
         return f"Report for {self.patient} at {self.created_at}"
