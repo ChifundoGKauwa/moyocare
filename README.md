@@ -28,7 +28,7 @@ The Android application is designed to support local data persistence and deferr
 - **Mobile application:** Android application developed using Kotlin.
 - **Backend API:** Django and Django REST Framework.
 - **Database:** PostgreSQL.
-- **Authentication:** JSON Web Token (JWT).
+- **Authentication:** Administrator-provisioned email/password sign-in with JWT API tokens.
 - **API documentation:** OpenAPI documentation using drf-spectacular.
 - **Synchronization:** Designed for reliable submission and synchronization of locally stored records.
 
@@ -82,7 +82,7 @@ The Android application is designed to support local data persistence and deferr
 
 ### Security and Access Control
 
-- JWT-based authentication.
+- Administrator-provisioned user accounts and JWT-based API sessions.
 - Role-based authorization.
 - Facility-scoped data access.
 - Input validation and controlled data exposure.
@@ -132,17 +132,26 @@ Base path:
 
 API documentation is provided through OpenAPI, allowing developers to inspect available endpoints, request schemas and response formats.
 
+See the [frontend API contract guide](docs/API_CONTRACTS.md) for authentication, endpoint
+permissions, request and response formats, pagination, errors, and offline synchronization.
+
 Patient profiles are managed at `POST /api/v1/patients/`. Submit a visit report to
-`POST /api/v1/patient-reports/` with the registered patient's UUID, symptom selections,
-age and gender at the time of the report, and the action taken. The mobile client should
-generate a stable `client_id` UUID and reuse it when retrying an offline submission; an
-identical retry returns the existing report instead of creating a duplicate.
+`POST /api/v1/patient-reports/` with a registered patient's UUID or a new nested patient
+identity, symptom selections, age and gender at the time of the report, and the action
+taken. The mobile client should generate stable UUIDs for a new patient and the report,
+then reuse those IDs when retrying an offline submission. Identical retries return the
+existing records instead of creating duplicates.
 
 ```json
 {
   "client_id": "2bd4f2bd-b7a0-460c-9db0-e58108fb22e0",
-  "patient": "bf9886a3-8d6a-49bb-b865-79013b7de4b9",
-  "patient_name": "Jane Banda",
+  "patient": {
+    "id": "bf9886a3-8d6a-49bb-b865-79013b7de4b9",
+    "facility": "13e10af4-610b-4a81-9e47-e9a3f415208c",
+    "first_name": "Jane",
+    "last_name": "Banda",
+    "village": "Chilinde"
+  },
   "age": 34,
   "gender": "female",
   "symptoms": ["fever", "cough"],
@@ -153,10 +162,28 @@ identical retry returns the existing report instead of creating a duplicate.
 
 `occurred_at` is optional; if omitted, the server records the submission time.
 
-Requests use JSON with `Content-Type: application/json` and a JWT bearer token. Patient
+The Android Jetpack Compose project is in [`mobile/`](mobile/). See its [setup notes](mobile/README.md)
+for the current screens, development API URL, and implementation status.
+
+Administrators create staff accounts and provide their email and initial password;
+there is no public registration endpoint. Staff sign in with those credentials and
+receive JWTs for API access. See the [frontend API contract guide](docs/API_CONTRACTS.md)
+for the login and token refresh flow. Requests use JSON with `Content-Type: application/json` and a JWT bearer token. Patient
 and report access is limited to the user's active facility memberships; staff accounts
 have administrative access across facilities. Facility memberships are assigned in
 Django admin.
+
+For offline synchronization, send up to 100 report objects in one request to
+`POST /api/v1/sync/batches/`. Include a client-generated `client_batch_id`; retry the
+same batch ID only with the same payload. The response reports each item as created,
+duplicate, rejected, or conflicting, and the batch can be fetched later at
+`GET /api/v1/sync/batches/{client_batch_id}/`.
+
+Authenticated users can request de-identified summary counts from
+`GET /api/v1/reports/summary/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD`. The API
+supports facility and symptom filters, limits the range to 366 days, and scopes
+non-staff results to the user's active facility memberships. Staff can review
+append-only audit metadata at `GET /api/v1/audit/events/`.
 
 ## Development Setup
 
