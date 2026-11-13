@@ -5,13 +5,14 @@ from pathlib import Path
 import environ
 
 BASE_DIR = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = BASE_DIR.parent
 SRC_DIR = BASE_DIR / "src"
 
 env = environ.Env(
     DEBUG=(bool, False),
 )
 
-environ.Env.read_env(BASE_DIR / ".env")
+environ.Env.read_env(PROJECT_ROOT / ".env")
 
 SECRET_KEY = env("SECRET_KEY", default="unsafe-development-key")
 DEBUG = env.bool("DEBUG", default=False)
