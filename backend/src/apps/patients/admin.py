@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from apps.audit.services import record_event
+
 from .models import Patient, PatientReport
 
 
@@ -10,6 +12,15 @@ class PatientAdmin(admin.ModelAdmin):
     search_fields = ("first_name", "last_name", "village", "facility__name")
     list_select_related = ("facility",)
     readonly_fields = ("created_at", "updated_at")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        record_event(
+            actor=request.user,
+            action="update" if change else "create",
+            resource_type="patient",
+            resource_id=obj.pk,
+        )
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -39,6 +50,9 @@ class PatientReportAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_staff
 
     def has_delete_permission(self, request, obj=None):
         return False
