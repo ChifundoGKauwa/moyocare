@@ -5,13 +5,15 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .views import ChangePasswordView, UserProfileView
-
+from .views import (
+    ChangePasswordView,
+    CreateStaffUserView,
+    UserProfileView,
+)
 
 app_name = "accounts"
 
 urlpatterns = [
-    # Authentication
     path(
         "token/",
         TokenObtainPairView.as_view(),
@@ -29,8 +31,11 @@ urlpatterns = [
         UserProfileView.as_view(),
         name="user-profile",
     ),
-
-    # Password management
+    path(
+        "register/",
+        CreateStaffUserView.as_view(),
+        name="user-register",
+    ),
     path(
         "change-password/",
         ChangePasswordView.as_view(),
