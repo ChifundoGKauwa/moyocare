@@ -1,6 +1,9 @@
+from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from rest_framework import permissions, viewsets
 from rest_framework.exceptions import APIException
+
+from apps.audit.services import AuditedViewSetMixin, record_event
 
 from .models import Facility
 from .serializers import FacilitySerializer
@@ -19,7 +22,8 @@ class IsStaffOrReadOnly(permissions.BasePermission):
         return bool(request.user and request.user.is_authenticated and request.user.is_staff)
 
 
-class FacilityViewSet(viewsets.ModelViewSet):
+class FacilityViewSet(AuditedViewSetMixin, viewsets.ModelViewSet):
+    audit_resource_type = "facility"
     serializer_class = FacilitySerializer
     permission_classes = (IsStaffOrReadOnly,)
     filterset_fields = ("organization", "facility_type", "district", "community", "is_active")
@@ -37,8 +41,15 @@ class FacilityViewSet(viewsets.ModelViewSet):
             is_active=True,
         ).distinct()
 
+    @transaction.atomic
     def perform_destroy(self, instance):
         try:
             instance.delete()
         except ProtectedError as exc:
             raise ResourceInUse() from exc
+        record_event(
+            actor=self.request.user,
+            action="delete",
+            resource_type=self.audit_resource_type,
+            resource_id=instance.pk,
+        )
